@@ -2,11 +2,29 @@ const conn = require('../db');
 const {StatusCodes} = require('http-status-codes');
 
 const allBooks =  (req, res) => {
-    let {category_id} = req.query;
+    let {category_id, news, limit, currentPage } = req.query;
+        
 
-        if (category_id) {
-            let sql = `SELECT * FROM books WHERE category_id=?`;
-        conn.query(sql, category_id,
+    let offset = limit * (currentPage-1);
+
+    let sql = `SELECT * FROM books`;
+    let values = [];
+        if (category_id && news) {
+            sql += `WHERE category_id=? AND pub_date BETWEEN`;
+            values = [category_id];
+        }
+            else if (category_id) {
+            sql += `WHERE category_id=?`;
+            values = [category_id];
+        }
+        else if (news) {
+            sql += `WHERE pub_date BETWEEN`;
+        }
+
+        sql +=  `LIMIT ? OFFSET ?`
+        values.push(parseInt(limit), offset);
+
+        conn.query(sql, values,
             (err, result) => {
             if (err) {
                 console.log(err);
@@ -17,11 +35,14 @@ const allBooks =  (req, res) => {
                 return res.status(StatusCodes.OK).json(result);
             else
                 return res.status(StatusCodes.NOT_FOUND).end();
-        })
-    } else {
+        })          
+    };
+
+const bookDetail =  (req, res) => {
     let {id} = req.params;
 
-    let sql = `SELECT * FROM books WHERE id=?`;
+    let sql = `SELECT * FROM books LEFT JOIN category
+            ON books.category_id = category_id; WHERE books.id=?;`;
     conn.query(sql, id,
         (err, result) => {
         if (err) {
@@ -33,14 +54,10 @@ const allBooks =  (req, res) => {
             return res.status(StatusCodes.OK).json(result[0]);
         else
             return res.status(StatusCodes.NOT_FOUND).end();
-    })}
-};
-
-const bookDetail =  (req, res) => {
-    res.json('개별 도서 조회');
+    })
 };
 
 module.exports = {
     allBooks,
-    bookDetail,
+    bookDetail
 };
