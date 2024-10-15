@@ -8,4 +8,5 @@ const connection = mysql.createConnection({
     dateStrings: true
   });
 
-  module.exports = connection
+
+module.exports = connection;

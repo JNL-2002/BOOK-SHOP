@@ -1,13 +1,13 @@
 const express = require ('express');
 const router = express.Router();
-const {addLike, removeLike} = require('../controller/likeController');
+const Likes = require('../controller/likeController');
 
 router.use(express.json());
 
 // 좋아요 추가
-router.post('/:id',addLike);
+router.post('/:id', Likes.addLike);
 
 // 좋아요 삭제
-router.delete('/:id',removeLike);
+router.delete('/:id', Likes.removeLike);
 
 module.exports = router;
